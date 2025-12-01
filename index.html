@@ -1,0 +1,136 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Story Web</title>
+<style>
+    body {
+        background: #111;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        background: #222;
+        border: 1px solid #444;
+        color: #fff;
+        border-radius: 6px;
+    }
+    button {
+        margin-top: 10px;
+        padding: 10px;
+        width: 100%;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    button:hover {
+        background: #45a049;
+    }
+    .story-button {
+        background: #333;
+        margin-top: 5px;
+        border: 1px solid #555;
+    }
+</style>
+</head>
+<body>
+
+<h1>My Personal Story Web</h1>
+
+<input id="search" type="text" placeholder="Search your stories..." onkeyup="searchStories()">
+
+<div id="storyList"></div>
+
+<hr>
+
+<h2>Write a New Story</h2>
+<input id="title" type="text" placeholder="Story Title...">
+
+<textarea id="storyText" placeholder="Write your story here..." rows="10"></textarea>
+
+<button onclick="saveStory()">Save Story</button>
+
+<hr>
+
+<h2>Download Your Story (.txt)</h2>
+<input id="filename" type="text" placeholder="Enter file name...">
+
+<button onclick="downloadStory()">Download Story</button>
+
+<script>
+function loadStories() {
+    const list = document.getElementById("storyList");
+    list.innerHTML = "";
+
+    const keys = Object.keys(localStorage);
+
+    keys.forEach(key => {
+        if (key.startsWith("story_")) {
+            const title = key.replace("story_", "");
+            list.innerHTML += `
+                <button class="story-button" onclick="openStory('${title}')">${title}</button>
+            `;
+        }
+    });
+}
+
+function saveStory() {
+    const title = document.getElementById("title").value.trim();
+    const text = document.getElementById("storyText").value;
+
+    if (title === "") {
+        alert("Title cannot be empty!");
+        return;
+    }
+
+    localStorage.setItem("story_" + title, text);
+    loadStories();
+    alert("Story saved!");
+}
+
+function openStory(title) {
+    document.getElementById("title").value = title;
+    document.getElementById("storyText").value = localStorage.getItem("story_" + title) || "";
+}
+
+function searchStories() {
+    const query = document.getElementById("search").value.toLowerCase();
+    const buttons = document.querySelectorAll(".story-button");
+
+    buttons.forEach(btn => {
+        if (btn.innerText.toLowerCase().includes(query)) {
+            btn.style.display = "block";
+        } else {
+            btn.style.display = "none";
+        }
+    });
+}
+
+function downloadStory() {
+    const text = document.getElementById("storyText").value;
+    const name = document.getElementById("filename").value.trim();
+
+    const fileName = (name !== "" ? name : "my_story") + ".txt";
+
+    const file = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(file);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+loadStories();
+</script>
+
+</body>
+</html>
